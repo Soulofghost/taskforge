@@ -1,0 +1,20 @@
+{
+  "name": "taskforge",
+  "version": "1.0.0",
+  "description": "Enterprise Kanban and Sprint Management SaaS with Granular RBAC and Audit Logging",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": [
+    "saas",
+    "kanban",
+    "project-management",
+    "rbac",
+    "audit-log",
+    "sqlite"
+  ],
+  "author": "Alvin MS (Soulofghost)",
+  "license": "MIT"
+}

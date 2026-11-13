@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskForge — Enterprise Kanban & Sprint SaaS</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="forge-layout">
+        <!-- Top App Bar -->
+        <header class="forge-header">
+            <div class="brand-zone">
+                <span class="forge-logo-icon">TF</span>
+                <div>
+                    <h1 class="forge-title">TaskForge</h1>
+                    <span class="forge-sub">Enterprise Kanban & Sprint Governance</span>
+                </div>
+            </div>
+
+            <!-- Sprint Milestone Telemetry -->
+            <div class="sprint-telemetry">
+                <div class="sprint-labels">
+                    <span id="sprint-name" class="sprint-active-name">Sprint 42: Active</span>
+                    <span id="sprint-progress-text" class="sprint-pct">0% Velocity</span>
+                </div>
+                <div class="sprint-bar-track">
+                    <div id="sprint-bar-fill" class="sprint-bar-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <!-- RBAC Role Switcher & New Task Action -->
+            <div class="header-actions">
+                <div class="role-selector-wrap">
+                    <span class="role-hint">SIMULATE ROLE:</span>
+                    <select id="user-role-select" class="role-select">
+                        <option value="admin">Alex Mercer (Admin)</option>
+                        <option value="member">Devon Vance (Member)</option>
+                        <option value="viewer">Sara Croft (Viewer)</option>
+                    </select>
+                </div>
+                <button id="btn-open-create-modal" class="btn-create-task">+ Create Task</button>
+            </div>
+        </header>
+
+        <!-- Kanban Board Container -->
+        <main class="board-container">
+            <div class="board-toolbar">
+                <div class="toolbar-left">
+                    <span class="view-tag">BOARD VIEW</span>
+                    <span id="total-tasks-badge" class="stats-badge">0 Tasks</span>
+                    <span id="total-points-badge" class="stats-badge">0 Story Points</span>
+                </div>
+                <div class="toolbar-right">
+                    <button id="btn-toggle-audit" class="btn-audit-toggle">Toggle Audit Trail</button>
+                </div>
+            </div>
+
+            <div class="kanban-grid">
+                <!-- Column: Backlog -->
+                <div class="kanban-column" data-status="backlog">
+                    <div class="column-header">
+                        <div class="col-title-wrap">
+                            <span class="status-indicator-dot dot-backlog"></span>
+                            <span class="col-title">BACKLOG</span>
+                        </div>
+                        <span id="count-backlog" class="col-counter">0</span>
+                    </div>
+                    <div id="col-backlog" class="card-dropzone"></div>
+                </div>
+
+                <!-- Column: In Progress -->
+                <div class="kanban-column" data-status="in_progress">
+                    <div class="column-header">
+                        <div class="col-title-wrap">
+                            <span class="status-indicator-dot dot-progress"></span>
+                            <span class="col-title">IN PROGRESS</span>
+                        </div>
+                        <span id="count-in_progress" class="col-counter">0</span>
+                    </div>
+                    <div id="col-in_progress" class="card-dropzone"></div>
+                </div>
+
+                <!-- Column: Review -->
+                <div class="kanban-column" data-status="review">
+                    <div class="column-header">
+                        <div class="col-title-wrap">
+                            <span class="status-indicator-dot dot-review"></span>
+                            <span class="col-title">IN REVIEW</span>
+                        </div>
+                        <span id="count-review" class="col-counter">0</span>
+                    </div>
+                    <div id="col-review" class="card-dropzone"></div>
+                </div>
+
+                <!-- Column: Done -->
+                <div class="kanban-column" data-status="done">
+                    <div class="column-header">
+                        <div class="col-title-wrap">
+                            <span class="status-indicator-dot dot-done"></span>
+                            <span class="col-title">COMPLETED</span>
+                        </div>
+                        <span id="count-done" class="col-counter">0</span>
+                    </div>
+                    <div id="col-done" class="card-dropzone"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Collapsible Audit Trail Drawer -->
+        <aside id="audit-drawer" class="audit-drawer">
+            <div class="drawer-header">
+                <span class="drawer-title">SECURITY & LIFECYCLE AUDIT LOG</span>
+                <button id="btn-close-audit" class="btn-drawer-close">&times;</button>
+            </div>
+            <div id="audit-log-list" class="audit-scroll">
+                <!-- Populated dynamically -->
+            </div>
+        </aside>
+    </div>
+
+    <!-- Create Task Modal -->
+    <div id="create-modal" class="modal-backdrop">
+        <div class="modal-window">
+            <div class="modal-top">
+                <h3>Create Sprint Task</h3>
+                <button id="btn-close-create-modal" class="btn-close">&times;</button>
+            </div>
+            <form id="create-task-form" class="modal-form">
+                <div class="form-row">
+                    <label>Task Summary</label>
+                    <input type="text" id="task-title" required placeholder="e.g. Implement rate limiting token bucket">
+                </div>
+                <div class="form-row">
+                    <label>Detailed Specification</label>
+                    <textarea id="task-desc" rows="3" required placeholder="Technical requirements, edge cases, and acceptance criteria..."></textarea>
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-row">
+                        <label>Priority</label>
+                        <select id="task-priority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="critical">Critical</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <label>Story Points</label>
+                        <input type="number" id="task-points" min="1" max="21" value="3">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>Assignee</label>
+                    <select id="task-assignee">
+                        <!-- Loaded dynamically -->
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" id="btn-cancel-task" class="btn-cancel">Cancel</button>
+                    <button type="submit" class="btn-save-task">Create Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Detail & Audit Modal -->
+    <div id="detail-modal" class="modal-backdrop">
+        <div class="modal-window">
+            <div class="modal-top">
+                <h3 id="detail-title">Task Specification</h3>
+                <button id="btn-close-detail-modal" class="btn-close">&times;</button>
+            </div>
+            <div class="detail-content">
+                <div class="detail-meta-row">
+                    <span id="detail-id" class="detail-id"></span>
+                    <span id="detail-priority" class="detail-badge"></span>
+                    <span id="detail-points" class="detail-badge"></span>
+                    <span id="detail-assignee" class="detail-assignee"></span>
+                </div>
+                <p id="detail-description" class="detail-desc-text"></p>
+                <div class="task-audit-section">
+                    <span class="task-audit-header">TASK AUDIT TIMELINE</span>
+                    <div id="detail-audit-list" class="task-audit-list"></div>
+                </div>
+                <div class="detail-footer">
+                    <button id="btn-delete-task" class="btn-delete-danger">Delete Task</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
